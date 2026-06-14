@@ -38,14 +38,14 @@ group = linguaGroupId
 description = linguaDescription
 
 plugins {
-    kotlin("multiplatform") version "2.4.0"
-    kotlin("plugin.serialization") version "2.4.0"
-    id("com.android.kotlin.multiplatform.library") version "9.2.1"
-    id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
-    id("org.jetbrains.dokka") version "2.2.0"
-    id("org.jetbrains.dokka-javadoc") version "2.2.0"
-    id("com.gradleup.shadow") version "9.4.2"
-    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.android.kmp.library)
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.dokka.javadoc)
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.nexus.publish)
     `maven-publish`
     signing
 }
@@ -54,24 +54,34 @@ plugins {
 kotlin {
     // Provision the exact JDK for compilation and the test suite via the foojay resolver
     // (settings.gradle.kts), so the build no longer depends on the machine's installed JDK.
-    jvmToolchain(25)
+    jvmToolchain(
+        libs.versions.jvmTarget
+            .get()
+            .toInt(),
+    )
 
     // Target set mirrors kmpile/llama.cpp-kmp. The Apple targets only build on a macOS host, so
     // they are declared only there; non-mac builds (and Windows CI) compile the rest.
     android {
         namespace = "com.kmpile.lingua"
-        compileSdk = 36
-        minSdk = 24
-        // Android bytecode cannot target 25 the way the desktop JVM does; cap at 11 like the
+        compileSdk =
+            libs.versions.compileSdk
+                .get()
+                .toInt()
+        minSdk =
+            libs.versions.minSdk
+                .get()
+                .toInt()
+        // Android bytecode cannot target 25 the way the desktop JVM does; cap lower like the
         // other kmpile Android libraries.
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.fromTarget(libs.versions.androidJvmTarget.get()))
         }
     }
 
     jvm {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_25)
+            jvmTarget.set(JvmTarget.fromTarget(libs.versions.jvmTarget.get()))
         }
     }
 
@@ -88,14 +98,14 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-            implementation("org.jetbrains.kotlinx:atomicfu:0.29.0")
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.atomicfu)
         }
         jvmTest.dependencies {
-            implementation("org.junit.jupiter:junit-jupiter:5.12.2")
-            implementation("org.assertj:assertj-core:3.27.3")
-            implementation("io.mockk:mockk:1.14.3")
-            runtimeOnly("org.junit.platform:junit-platform-launcher")
+            implementation(libs.junit.jupiter)
+            implementation(libs.assertj.core)
+            implementation(libs.mockk)
+            runtimeOnly(libs.junit.platform.launcher)
         }
     }
 }
