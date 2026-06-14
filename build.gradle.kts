@@ -16,12 +16,8 @@
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.Locale
 
-val linguaTaskGroup: String by project
 val linguaGroupId: String by project
-val linguaArtifactId: String by project
 val linguaName: String by project
 val linguaDescription: String by project
 val linguaLicenseName: String by project
@@ -34,19 +30,15 @@ val linguaDeveloperUrl: String by project
 val linguaScmConnection: String by project
 val linguaScmDeveloperConnection: String by project
 val linguaScmUrl: String by project
-val linguaSupportedDetectors: String by project
-val linguaSupportedLanguages: String by project
 val linguaMainClass: String by project
-val linguaCsvHeader: String by project
 val githubPackagesUrl: String by project
-
-val compileTestKotlin: KotlinCompile by tasks
 
 group = linguaGroupId
 description = linguaDescription
 
 plugins {
-    kotlin("jvm") version "2.4.0"
+    kotlin("multiplatform") version "2.4.0"
+    kotlin("plugin.serialization") version "2.4.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     id("org.jetbrains.dokka") version "2.2.0"
     id("org.jetbrains.dokka-javadoc") version "2.2.0"
@@ -54,206 +46,35 @@ plugins {
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
     `maven-publish`
     signing
-    jacoco
 }
 
 kotlin {
     // Provision the exact JDK for compilation and the test suite via the foojay resolver
     // (settings.gradle.kts), so the build no longer depends on the machine's installed JDK.
     jvmToolchain(25)
-    compilerOptions {
-        jvmTarget = JvmTarget.JVM_25
-    }
-}
 
-jacoco.toolVersion = "0.8.13"
-
-sourceSets {
-    main {
-        resources {
-            exclude("training-data/**")
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_25)
         }
     }
-    create("accuracyReport") {
-        compileClasspath += sourceSets.main.get().output
-        runtimeClasspath += sourceSets.main.get().output
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+            implementation("org.jetbrains.kotlinx:atomicfu:0.29.0")
+        }
+        jvmTest.dependencies {
+            implementation("org.junit.jupiter:junit-jupiter:5.12.2")
+            implementation("org.assertj:assertj-core:3.27.3")
+            implementation("io.mockk:mockk:1.14.3")
+            runtimeOnly("org.junit.platform:junit-platform-launcher")
+        }
     }
 }
-
-val accuracyReportImplementation by configurations.getting {
-    extendsFrom(configurations.testImplementation.get())
-}
-
-configurations["accuracyReportRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
 
 tasks.withType<Test> {
     useJUnitPlatform { failFast = true }
-}
-
-tasks.jacocoTestReport {
-    dependsOn("test")
-    reports {
-        xml.required.set(true)
-        csv.required.set(false)
-        html.required.set(true)
-    }
-    classDirectories.setFrom(
-        files(
-            classDirectories.files.map {
-                fileTree(it) {
-                    exclude("**/app/**")
-                }
-            },
-        ),
-    )
-}
-
-tasks.register<Test>("accuracyReport") {
-    group = linguaTaskGroup
-    description = "Runs Lingua on provided test data, and writes detection accuracy reports for each language."
-    testClassesDirs = sourceSets["accuracyReport"].output.classesDirs
-    classpath = sourceSets["accuracyReport"].runtimeClasspath
-
-    val allowedDetectors = linguaSupportedDetectors.split(',')
-    val detectors =
-        if (project.hasProperty("detectors")) {
-            project.property("detectors").toString().split(Regex("\\s*,\\s*"))
-        } else {
-            allowedDetectors
-        }
-
-    detectors.filterNot { it in allowedDetectors }.forEach {
-        throw GradleException(
-            """
-            detector '$it' does not exist
-            supported detectors: ${allowedDetectors.joinToString(
-                ", ",
-            )}
-            """.trimIndent(),
-        )
-    }
-
-    val allowedLanguages = linguaSupportedLanguages.split(',')
-    val languages =
-        if (project.hasProperty("languages")) {
-            project.property("languages").toString().split(Regex("\\s*,\\s*"))
-        } else {
-            allowedLanguages
-        }
-
-    languages.filterNot { it in allowedLanguages }.forEach {
-        throw GradleException("language '$it' is not supported")
-    }
-
-    val availableCpuCores = Runtime.getRuntime().availableProcessors()
-    val cpuCoresRepr =
-        if (project.hasProperty("cpuCores")) {
-            project.property("cpuCores").toString()
-        } else {
-            "1"
-        }
-
-    val cpuCores =
-        try {
-            cpuCoresRepr.toInt()
-        } catch (e: NumberFormatException) {
-            throw GradleException("'$cpuCoresRepr' is not a valid value for argument -PcpuCores")
-        }
-
-    if (cpuCores !in 1..availableCpuCores) {
-        throw GradleException(
-            """
-            $cpuCores cpu cores are not supported
-            minimum: 1
-            maximum: $availableCpuCores
-            """.trimIndent(),
-        )
-    }
-
-    maxHeapSize = "4096m"
-    maxParallelForks = cpuCores
-    reports.html.required.set(false)
-    reports.junitXml.required.set(false)
-
-    filter {
-        detectors.forEach { detector ->
-            languages.forEach { language ->
-                includeTestsMatching(
-                    "$linguaGroupId.$linguaArtifactId.report" +
-                        ".${detector.lowercase(Locale.ROOT)}.${language}DetectionAccuracyReport",
-                )
-            }
-        }
-    }
-}
-
-tasks.register("writeAggregatedAccuracyReport") {
-    group = linguaTaskGroup
-    description = "Creates a table from all accuracy detection reports and writes it to a CSV file."
-
-    doLast {
-        val accuracyReportsDirectoryName = "accuracy-reports"
-        val accuracyReportsDirectory = file(accuracyReportsDirectoryName)
-        if (!accuracyReportsDirectory.exists()) {
-            throw GradleException("directory '$accuracyReportsDirectoryName' does not exist")
-        }
-
-        val detectors = linguaSupportedDetectors.split(',')
-        val languages = linguaSupportedLanguages.split(',')
-
-        val csvFile = file("$accuracyReportsDirectoryName/aggregated-accuracy-values.csv")
-        val stringToSplitAt = ">> Exact values:"
-
-        if (csvFile.exists()) csvFile.delete()
-        csvFile.createNewFile()
-        csvFile.appendText(linguaCsvHeader)
-        csvFile.appendText("\n")
-
-        for (language in languages) {
-            csvFile.appendText(language)
-
-            for (detector in detectors) {
-                val languageReportFileName =
-                    "$accuracyReportsDirectoryName/${detector.lowercase(Locale.ROOT)}/$language.txt"
-                val languageReportFile = file(languageReportFileName)
-                val sliceLength = if (detector == "Lingua") (1..8) else (1..4)
-
-                if (languageReportFile.exists()) {
-                    for (line in languageReportFile.readLines()) {
-                        if (line.startsWith(stringToSplitAt)) {
-                            val accuracyValues =
-                                line
-                                    .split(stringToSplitAt)[1]
-                                    .split(' ')
-                                    .slice(sliceLength)
-                                    .joinToString(",")
-                            csvFile.appendText(",")
-                            csvFile.appendText(accuracyValues)
-                        }
-                    }
-                } else {
-                    if (detector == "Lingua") {
-                        csvFile.appendText(",NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN")
-                    } else {
-                        csvFile.appendText(",NaN,NaN,NaN,NaN")
-                    }
-                }
-            }
-
-            csvFile.appendText("\n")
-        }
-
-        println("file 'aggregated-accuracy-values.csv' written successfully")
-    }
-}
-
-tasks.named("compileAccuracyReportKotlin", KotlinCompile::class) {
-    compilerOptions.jvmTarget.set(JvmTarget.JVM_25)
-}
-
-tasks.named("compileAccuracyReportJava", JavaCompile::class) {
-    sourceCompatibility = JavaVersion.VERSION_25.toString()
-    targetCompatibility = JavaVersion.VERSION_25.toString()
 }
 
 dokka {
@@ -274,84 +95,62 @@ tasks.register<Jar>("dokkaJavadocJar") {
     from(tasks.named("dokkaGeneratePublicationJavadoc"))
 }
 
-tasks.register<Jar>("sourcesJar") {
-    group = "Build"
-    description = "Assembles a jar archive containing the main source code."
-    archiveClassifier.set("sources")
-    from("src/main/kotlin")
-}
-
 tasks.register<ShadowJar>("jarWithDependencies") {
     group = "Build"
     description = "Assembles a jar archive containing the main classes and all external dependencies."
     archiveClassifier.set("with-dependencies")
-    from(sourceSets.main.get().output)
-    configurations = listOf(project.configurations.runtimeClasspath.get())
+    from(
+        kotlin
+            .jvm()
+            .compilations
+            .getByName("main")
+            .output.allOutputs,
+    )
+    configurations = listOf(project.configurations.getByName("jvmRuntimeClasspath"))
     manifest { attributes("Main-Class" to linguaMainClass) }
 }
 
 tasks.register<JavaExec>("runLinguaOnConsole") {
-    group = linguaTaskGroup
+    group = "application"
     description = "Starts a REPL (read-evaluate-print loop) to try Lingua on the command line."
     mainClass.set(linguaMainClass)
     standardInput = System.`in`
-    classpath = sourceSets["main"].runtimeClasspath
-}
-
-dependencies {
-    implementation("com.squareup.moshi:moshi:1.15.2")
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
-    implementation("it.unimi.dsi:fastutil:8.5.16")
-
-    testImplementation("org.junit.jupiter:junit-jupiter:5.12.2")
-    testImplementation("org.assertj:assertj-core:3.27.3")
-    testImplementation("io.mockk:mockk:1.14.3")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
-    accuracyReportImplementation("com.optimaize.languagedetector:language-detector:0.6")
-    accuracyReportImplementation("org.apache.opennlp:opennlp-tools:2.5.9")
-    accuracyReportImplementation("org.apache.tika:tika-core:3.3.1")
-    accuracyReportImplementation("org.apache.tika:tika-langdetect-optimaize:3.3.1")
-    accuracyReportImplementation("org.slf4j:slf4j-nop:2.0.17")
+    classpath =
+        files(
+            kotlin
+                .jvm()
+                .compilations
+                .getByName("main")
+                .output.allOutputs,
+            project.configurations.getByName("jvmRuntimeClasspath"),
+        )
 }
 
 publishing {
-    publications {
-        create<MavenPublication>("lingua") {
-            groupId = linguaGroupId
-            artifactId = linguaArtifactId
-            version = project.version.toString()
+    publications.withType<MavenPublication>().configureEach {
+        pom {
+            name.set(linguaName)
+            description.set(linguaDescription)
+            url.set(linguaWebsiteUrl)
 
-            from(components["kotlin"])
-
-            artifact(tasks["sourcesJar"])
-            artifact(tasks["jarWithDependencies"])
-            artifact(tasks["dokkaJavadocJar"])
-
-            pom {
-                name.set(linguaName)
-                description.set(linguaDescription)
-                url.set(linguaWebsiteUrl)
-
-                licenses {
-                    license {
-                        name.set(linguaLicenseName)
-                        url.set(linguaLicenseUrl)
-                    }
+            licenses {
+                license {
+                    name.set(linguaLicenseName)
+                    url.set(linguaLicenseUrl)
                 }
-                developers {
-                    developer {
-                        id.set(linguaDeveloperId)
-                        name.set(linguaDeveloperName)
-                        email.set(linguaDeveloperEmail)
-                        url.set(linguaDeveloperUrl)
-                    }
+            }
+            developers {
+                developer {
+                    id.set(linguaDeveloperId)
+                    name.set(linguaDeveloperName)
+                    email.set(linguaDeveloperEmail)
+                    url.set(linguaDeveloperUrl)
                 }
-                scm {
-                    connection.set(linguaScmConnection)
-                    developerConnection.set(linguaScmDeveloperConnection)
-                    url.set(linguaScmUrl)
-                }
+            }
+            scm {
+                connection.set(linguaScmConnection)
+                developerConnection.set(linguaScmDeveloperConnection)
+                url.set(linguaScmUrl)
             }
         }
     }
@@ -375,7 +174,8 @@ nexusPublishing {
 }
 
 signing {
-    sign(publishing.publications["lingua"])
+    isRequired = false
+    sign(publishing.publications)
 }
 
 repositories {

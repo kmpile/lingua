@@ -25,7 +25,7 @@ jobs:
         uses: battila7/get-version-action@v2
 
       - name: Create release artifacts
-        run: ./gradlew -Pversion=${{ steps.version.outputs.version-without-v }} jar sourcesJar jarWithDependencies dokkaJavadocJar
+        run: ./gradlew -Pversion=${{ steps.version.outputs.version-without-v }} jvmJar jvmSourcesJar jarWithDependencies dokkaJavadocJar
 
       - name: Create release and upload artifacts
         uses: softprops/action-gh-release@v2
