@@ -254,11 +254,12 @@ class LanguageModelFilesWriterTest {
         )
     }
 
-    private fun retrieveAndSortModelFiles(outputDirectoryPath: Path): List<Path> {
-        return Files.list(outputDirectoryPath).sorted { first, second ->
-            first.fileName.compareTo(second.fileName)
-        }.collect(toList())
-    }
+    private fun retrieveAndSortModelFiles(outputDirectoryPath: Path): List<Path> =
+        Files
+            .list(outputDirectoryPath)
+            .sorted { first, second ->
+                first.fileName.compareTo(second.fileName)
+            }.collect(toList())
 
     private fun testModelFile(
         modelFilePath: Path,

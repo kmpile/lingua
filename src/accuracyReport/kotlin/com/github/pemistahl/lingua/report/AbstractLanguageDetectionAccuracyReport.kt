@@ -169,10 +169,11 @@ abstract class AbstractLanguageDetectionAccuracyReport(
             report += "$newlines$legend"
         }
 
-        for (reportPart in reportParts)
+        for (reportPart in reportParts) {
             if (reportPart.isNotEmpty()) {
                 report += "$newlines$reportPart"
             }
+        }
 
         report += "$newlines>> Exact values:"
 
@@ -313,8 +314,8 @@ abstract class AbstractLanguageDetectionAccuracyReport(
         return accuracies to report
     }
 
-    private fun mapOpenNlpIsoCodeToLinguaIsoCode(isoCode: String): String {
-        return when (isoCode) {
+    private fun mapOpenNlpIsoCodeToLinguaIsoCode(isoCode: String): String =
+        when (isoCode) {
             "CMN", "NAN" -> "ZHO" // map Mandarin and Min Nan to Chinese
             "LVS" -> "LAV" // map Standard Latvian to Latvian
             "NDS" -> "DEU" // map Low German to German
@@ -322,34 +323,61 @@ abstract class AbstractLanguageDetectionAccuracyReport(
             "PNB" -> "PAN" // map Western Punjabi to Punjabi
             else -> isoCode
         }
-    }
 
-    private fun mapLocaleToLanguage(locale: Optional<LdLocale>): Language {
-        return when {
+    private fun mapLocaleToLanguage(locale: Optional<LdLocale>): Language =
+        when {
             !locale.isPresent -> UNKNOWN
             locale.get().language.startsWith("zh") -> CHINESE
             else -> Language.getByIsoCode639_1(IsoCode639_1.valueOf(locale.get().language.uppercase()))
         }
-    }
 
-    private fun mapLanguageResultToLanguage(result: LanguageResult): Language {
-        return when {
+    private fun mapLanguageResultToLanguage(result: LanguageResult): Language =
+        when {
             result.isUnknown -> UNKNOWN
             result.language.startsWith("zh") -> CHINESE
             else -> Language.getByIsoCode639_1(IsoCode639_1.valueOf(result.language.uppercase()))
         }
-    }
 
     companion object {
         private val languageIsoCodesToTest =
-            Language.values().toSet().minus(arrayOf(UNKNOWN)).map {
-                it.isoCode639_1
-            }.toTypedArray()
+            Language
+                .values()
+                .toSet()
+                .minus(arrayOf(UNKNOWN))
+                .map {
+                    it.isoCode639_1
+                }.toTypedArray()
 
         private val filteredIsoCodesForTikaAndOptimaize =
-            languageIsoCodesToTest.filterNot {
-                it in setOf(AM, AZ, BS, EO, HY, KA, KK, LA, LG, MI, MN, NB, NN, OM, SI, SN, ST, TI, TN, TS, XH, YO, ZU)
-            }.map { it.toString() }
+            languageIsoCodesToTest
+                .filterNot {
+                    it in
+                        setOf(
+                            AM,
+                            AZ,
+                            BS,
+                            EO,
+                            HY,
+                            KA,
+                            KK,
+                            LA,
+                            LG,
+                            MI,
+                            MN,
+                            NB,
+                            NN,
+                            OM,
+                            SI,
+                            SN,
+                            ST,
+                            TI,
+                            TN,
+                            TS,
+                            XH,
+                            YO,
+                            ZU,
+                        )
+                }.map { it.toString() }
 
         internal val linguaDetectorWithLowAccuracy by lazy {
             LanguageDetectorBuilder
@@ -385,12 +413,13 @@ abstract class AbstractLanguageDetectionAccuracyReport(
 
         private val tikaDetector by lazy {
             OptimaizeLangDetector().loadModels(
-                filteredIsoCodesForTikaAndOptimaize.map {
-                    when (it) {
-                        "zh" -> "$it-CN"
-                        else -> it
-                    }
-                }.toSet(),
+                filteredIsoCodesForTikaAndOptimaize
+                    .map {
+                        when (it) {
+                            "zh" -> "$it-CN"
+                            else -> it
+                        }
+                    }.toSet(),
             )
         }
 

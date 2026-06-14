@@ -153,7 +153,8 @@ class LanguageDetector internal constructor(
                                     val languages = probabilities.keys
                                     val unigramFilteredLanguages =
                                         if (languages.isNotEmpty()) {
-                                            filteredLanguages.asSequence()
+                                            filteredLanguages
+                                                .asSequence()
                                                 .filter { languages.contains(it) }
                                                 .toSet()
                                         } else {
@@ -231,12 +232,13 @@ class LanguageDetector internal constructor(
         }
     }
 
-    internal fun cleanUpInputText(text: String): String {
-        return text.trim().lowercase()
+    internal fun cleanUpInputText(text: String): String =
+        text
+            .trim()
+            .lowercase()
             .replace(PUNCTUATION, "")
             .replace(NUMBERS, "")
             .replace(MULTIPLE_WHITESPACE, " ")
-    }
 
     internal fun splitTextIntoWords(text: String): List<String> {
         val words = mutableListOf<String>()
@@ -324,11 +326,12 @@ class LanguageDetector internal constructor(
                         Alphabet.LATIN.matches(character) ||
                             Alphabet.CYRILLIC.matches(character) ||
                             Alphabet.DEVANAGARI.matches(character) ->
-                            languagesWithUniqueCharacters.filter {
-                                it.uniqueCharacters?.contains(character) ?: false
-                            }.forEach {
-                                wordLanguageCounts.incrementCounter(it)
-                            }
+                            languagesWithUniqueCharacters
+                                .filter {
+                                    it.uniqueCharacters?.contains(character) ?: false
+                                }.forEach {
+                                    wordLanguageCounts.incrementCounter(it)
+                                }
                     }
                 }
             }

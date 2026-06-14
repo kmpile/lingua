@@ -17,7 +17,9 @@
 package com.github.pemistahl.lingua.internal
 
 @JvmInline
-internal value class Ngram(val value: String) : Comparable<Ngram> {
+internal value class Ngram(
+    val value: String,
+) : Comparable<Ngram> {
     init {
         require(value.length in 0..5) {
             "length of ngram '$value' is not in range 0..5"
@@ -53,7 +55,8 @@ internal value class Ngram(val value: String) : Comparable<Ngram> {
 internal data class NgramRange(
     override val start: Ngram,
     override val endInclusive: Ngram,
-) : ClosedRange<Ngram>, Iterable<Ngram> {
+) : ClosedRange<Ngram>,
+    Iterable<Ngram> {
     init {
         require(start >= endInclusive) {
             "'$start' must be of higher order than '$endInclusive'"
@@ -65,7 +68,9 @@ internal data class NgramRange(
     override fun iterator(): Iterator<Ngram> = NgramIterator(start)
 }
 
-internal data class NgramIterator(private val start: Ngram) : Iterator<Ngram> {
+internal data class NgramIterator(
+    private val start: Ngram,
+) : Iterator<Ngram> {
     private var current = start
 
     override fun hasNext(): Boolean = current.value.isNotEmpty()

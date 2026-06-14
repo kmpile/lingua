@@ -15,7 +15,6 @@
  */
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Locale
@@ -47,28 +46,27 @@ group = linguaGroupId
 description = linguaDescription
 
 plugins {
-    kotlin("jvm") version "2.1.0"
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
-    id("org.jetbrains.dokka") version "1.9.20"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    kotlin("jvm") version "2.4.0"
+    id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
+    id("org.jetbrains.dokka") version "2.2.0"
+    id("org.jetbrains.dokka-javadoc") version "2.2.0"
+    id("com.gradleup.shadow") version "9.4.2"
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
     `maven-publish`
     signing
     jacoco
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
 kotlin {
+    // Provision the exact JDK for compilation and the test suite via the foojay resolver
+    // (settings.gradle.kts), so the build no longer depends on the machine's installed JDK.
+    jvmToolchain(25)
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_1_8
+        jvmTarget = JvmTarget.JVM_25
     }
 }
 
-jacoco.toolVersion = "0.8.8"
+jacoco.toolVersion = "0.8.13"
 
 sourceSets {
     main {
@@ -250,17 +248,17 @@ tasks.register("writeAggregatedAccuracyReport") {
 }
 
 tasks.named("compileAccuracyReportKotlin", KotlinCompile::class) {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
+    compilerOptions.jvmTarget.set(JvmTarget.JVM_25)
 }
 
 tasks.named("compileAccuracyReportJava", JavaCompile::class) {
-    sourceCompatibility = JavaVersion.VERSION_17.toString()
-    targetCompatibility = JavaVersion.VERSION_17.toString()
+    sourceCompatibility = JavaVersion.VERSION_25.toString()
+    targetCompatibility = JavaVersion.VERSION_25.toString()
 }
 
-tasks.withType<DokkaTask>().configureEach {
+dokka {
     dokkaSourceSets.configureEach {
-        jdkVersion.set(8)
+        jdkVersion.set(25)
         reportUndocumented.set(false)
         perPackageOption {
             matchingRegex.set(".*\\.(app|internal).*")
@@ -270,11 +268,10 @@ tasks.withType<DokkaTask>().configureEach {
 }
 
 tasks.register<Jar>("dokkaJavadocJar") {
-    dependsOn("dokkaJavadoc")
     group = "Build"
     description = "Assembles a jar archive containing Javadoc documentation."
     archiveClassifier.set("javadoc")
-    from("${layout.buildDirectory}/dokka/javadoc")
+    from(tasks.named("dokkaGeneratePublicationJavadoc"))
 }
 
 tasks.register<Jar>("sourcesJar") {
@@ -304,17 +301,18 @@ tasks.register<JavaExec>("runLinguaOnConsole") {
 dependencies {
     implementation("com.squareup.moshi:moshi:1.15.2")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
-    implementation("it.unimi.dsi:fastutil:8.5.15")
+    implementation("it.unimi.dsi:fastutil:8.5.16")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
-    testImplementation("org.assertj:assertj-core:3.26.3")
-    testImplementation("io.mockk:mockk:1.13.14")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.12.2")
+    testImplementation("org.assertj:assertj-core:3.27.3")
+    testImplementation("io.mockk:mockk:1.14.3")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     accuracyReportImplementation("com.optimaize.languagedetector:language-detector:0.6")
-    accuracyReportImplementation("org.apache.opennlp:opennlp-tools:2.5.1")
-    accuracyReportImplementation("org.apache.tika:tika-core:3.0.0")
-    accuracyReportImplementation("org.apache.tika:tika-langdetect-optimaize:3.0.0")
-    accuracyReportImplementation("org.slf4j:slf4j-nop:2.0.16")
+    accuracyReportImplementation("org.apache.opennlp:opennlp-tools:2.5.9")
+    accuracyReportImplementation("org.apache.tika:tika-core:3.3.1")
+    accuracyReportImplementation("org.apache.tika:tika-langdetect-optimaize:3.3.1")
+    accuracyReportImplementation("org.slf4j:slf4j-nop:2.0.17")
 }
 
 publishing {

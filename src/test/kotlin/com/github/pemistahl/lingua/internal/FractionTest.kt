@@ -38,9 +38,10 @@ class FractionTest {
 
     @Test
     fun `assert that Fraction with denominator zero can not be created`() {
-        assertThatExceptionOfType(ArithmeticException::class.java).isThrownBy {
-            Fraction(1234, 0)
-        }.withMessage("zero denominator in fraction '1234/0'")
+        assertThatExceptionOfType(ArithmeticException::class.java)
+            .isThrownBy {
+                Fraction(1234, 0)
+            }.withMessage("zero denominator in fraction '1234/0'")
     }
 
     @Test

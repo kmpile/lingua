@@ -21,7 +21,8 @@ import com.github.pemistahl.lingua.internal.Constant.LANGUAGES_SUPPORTING_LOGOGR
 
 // Cache set of scripts here to avoid evaluating it every time for isLogogram()
 private val scriptsWithLogograms =
-    LANGUAGES_SUPPORTING_LOGOGRAMS.asSequence()
+    LANGUAGES_SUPPORTING_LOGOGRAMS
+        .asSequence()
         .flatMap(Language::alphabets)
         .toSet()
 

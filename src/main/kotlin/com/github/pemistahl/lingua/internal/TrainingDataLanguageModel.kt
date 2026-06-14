@@ -27,7 +27,10 @@ import okio.buffer
 import okio.source
 import java.io.InputStream
 
-internal class JsonLanguageModel(val language: Language, val ngrams: Map<Fraction, String>)
+internal class JsonLanguageModel(
+    val language: Language,
+    val ngrams: Map<Fraction, String>,
+)
 
 internal class TrainingDataLanguageModel(
     val language: Language,
@@ -157,7 +160,8 @@ internal class TrainingDataLanguageModel(
 }
 
 private val JSON_ADAPTER =
-    Moshi.Builder()
+    Moshi
+        .Builder()
         .add(FractionAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()

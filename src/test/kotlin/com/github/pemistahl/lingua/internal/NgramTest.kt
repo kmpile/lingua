@@ -99,11 +99,12 @@ class NgramTest {
         val zerogram = unigram.dec()
         assertThat(zerogram).isEqualTo(zerogram)
 
-        assertThatIllegalStateException().isThrownBy {
-            zerogram.dec()
-        }.withMessage(
-            "Zerogram is ngram type of lowest order and can not be decremented",
-        )
+        assertThatIllegalStateException()
+            .isThrownBy {
+                zerogram.dec()
+            }.withMessage(
+                "Zerogram is ngram type of lowest order and can not be decremented",
+            )
     }
 
     @Test
@@ -122,9 +123,10 @@ class NgramTest {
             assertThat(iterator()).isEqualTo(NgramIterator(fivegram))
         }
 
-        assertThatIllegalArgumentException().isThrownBy {
-            NgramRange(bigram, fivegram)
-        }.withMessage("'qw' must be of higher order than 'qwert'")
+        assertThatIllegalArgumentException()
+            .isThrownBy {
+                NgramRange(bigram, fivegram)
+            }.withMessage("'qw' must be of higher order than 'qwert'")
     }
 
     @Test

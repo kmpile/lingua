@@ -16,7 +16,9 @@
 
 package com.github.pemistahl.lingua.internal
 
-internal data class TestDataLanguageModel(val ngrams: Set<Ngram>) {
+internal data class TestDataLanguageModel(
+    val ngrams: Set<Ngram>,
+) {
     companion object {
         private val LETTER_REGEX = Regex("\\p{L}+")
 

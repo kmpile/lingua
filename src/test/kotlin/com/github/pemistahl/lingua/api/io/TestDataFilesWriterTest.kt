@@ -210,11 +210,12 @@ class TestDataFilesWriterTest {
         )
     }
 
-    private fun retrieveAndSortSubdirectories(outputDirectoryPath: Path): List<Path> {
-        return Files.list(outputDirectoryPath).sorted { first, second ->
-            first.fileName.compareTo(second.fileName)
-        }.collect(toList())
-    }
+    private fun retrieveAndSortSubdirectories(outputDirectoryPath: Path): List<Path> =
+        Files
+            .list(outputDirectoryPath)
+            .sorted { first, second ->
+                first.fileName.compareTo(second.fileName)
+            }.collect(toList())
 
     private fun testSubDirectory(
         subDirectoryPath: Path,
@@ -236,7 +237,8 @@ class TestDataFilesWriterTest {
         assertThat(testDataFileName).`as`("file name").isEqualTo("en.txt")
 
         val testDataFileContent = testDataFilePath.toFile().readText()
-        assertThat(testDataFileContent.replace("\r\n", "\n")).`as`("file content")
+        assertThat(testDataFileContent.replace("\r\n", "\n"))
+            .`as`("file content")
             .isEqualTo(expectedFileContent.replace("\r\n", "\n"))
     }
 }

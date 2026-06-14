@@ -337,11 +337,12 @@ class LanguageDetectorTest {
 
     @Test
     fun `assert that ngram probability lookup does not work for Zerogram`() {
-        assertThatIllegalArgumentException().isThrownBy {
-            detectorForEnglishAndGerman.lookUpNgramProbability(ENGLISH, Ngram(""))
-        }.withMessage(
-            "Zerogram detected",
-        )
+        assertThatIllegalArgumentException()
+            .isThrownBy {
+                detectorForEnglishAndGerman.lookUpNgramProbability(ENGLISH, Ngram(""))
+            }.withMessage(
+                "Zerogram detected",
+            )
     }
 
     // ngram probability summation
@@ -806,18 +807,73 @@ class LanguageDetectorTest {
             arguments(
                 "només",
                 listOf(
-                    CATALAN, CZECH, FRENCH, HUNGARIAN, ICELANDIC, IRISH, ITALIAN, PORTUGUESE, SLOVAK, SPANISH,
-                    VIETNAMESE, YORUBA,
+                    CATALAN,
+                    CZECH,
+                    FRENCH,
+                    HUNGARIAN,
+                    ICELANDIC,
+                    IRISH,
+                    ITALIAN,
+                    PORTUGUESE,
+                    SLOVAK,
+                    SPANISH,
+                    VIETNAMESE,
+                    YORUBA,
                 ),
             ),
             arguments(
                 "house",
                 listOf(
-                    AFRIKAANS, ALBANIAN, AZERBAIJANI, BASQUE, BOKMAL, BOSNIAN, CATALAN, CROATIAN, CZECH, DANISH,
-                    DUTCH, ENGLISH, ESPERANTO, ESTONIAN, FINNISH, FRENCH, GANDA, GERMAN, HUNGARIAN, ICELANDIC,
-                    INDONESIAN, IRISH, ITALIAN, LATIN, LATVIAN, LITHUANIAN, MALAY, MAORI, NYNORSK, OROMO, POLISH,
-                    PORTUGUESE, ROMANIAN, SHONA, SLOVAK, SLOVENE, SOMALI, SOTHO, SPANISH, SWAHILI, SWEDISH,
-                    TAGALOG, TSONGA, TSWANA, TURKISH, VIETNAMESE, WELSH, XHOSA, YORUBA, ZULU,
+                    AFRIKAANS,
+                    ALBANIAN,
+                    AZERBAIJANI,
+                    BASQUE,
+                    BOKMAL,
+                    BOSNIAN,
+                    CATALAN,
+                    CROATIAN,
+                    CZECH,
+                    DANISH,
+                    DUTCH,
+                    ENGLISH,
+                    ESPERANTO,
+                    ESTONIAN,
+                    FINNISH,
+                    FRENCH,
+                    GANDA,
+                    GERMAN,
+                    HUNGARIAN,
+                    ICELANDIC,
+                    INDONESIAN,
+                    IRISH,
+                    ITALIAN,
+                    LATIN,
+                    LATVIAN,
+                    LITHUANIAN,
+                    MALAY,
+                    MAORI,
+                    NYNORSK,
+                    OROMO,
+                    POLISH,
+                    PORTUGUESE,
+                    ROMANIAN,
+                    SHONA,
+                    SLOVAK,
+                    SLOVENE,
+                    SOMALI,
+                    SOTHO,
+                    SPANISH,
+                    SWAHILI,
+                    SWEDISH,
+                    TAGALOG,
+                    TSONGA,
+                    TSWANA,
+                    TURKISH,
+                    VIETNAMESE,
+                    WELSH,
+                    XHOSA,
+                    YORUBA,
+                    ZULU,
                 ),
             ),
         )

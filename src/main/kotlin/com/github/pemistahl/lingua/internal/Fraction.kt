@@ -21,7 +21,8 @@ import com.squareup.moshi.ToJson
 internal data class Fraction(
     var numerator: Int,
     var denominator: Int,
-) : Number(), Comparable<Fraction> {
+) : Number(),
+    Comparable<Fraction> {
     init {
         val (num, den) = reduceToLowestTerms(numerator, denominator)
         this.numerator = num

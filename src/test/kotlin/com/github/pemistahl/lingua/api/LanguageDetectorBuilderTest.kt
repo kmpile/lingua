@@ -115,9 +115,12 @@ class LanguageDetectorBuilderTest {
                     Language.ROMANIAN,
                 )
             val expectedLanguages =
-                Language.values().toSet().minus(
-                    arrayOf(Language.TURKISH, Language.ROMANIAN, Language.UNKNOWN),
-                ).toList()
+                Language
+                    .values()
+                    .toSet()
+                    .minus(
+                        arrayOf(Language.TURKISH, Language.ROMANIAN, Language.UNKNOWN),
+                    ).toList()
 
             assertThat(builder.languages).isEqualTo(expectedLanguages)
             assertThat(builder.minimumRelativeDistance).isEqualTo(0.0)
@@ -143,10 +146,16 @@ class LanguageDetectorBuilderTest {
             )
         }
         run {
-            val languages = Language.values().toSet().minus(arrayOf(GERMAN, ENGLISH)).toTypedArray()
-            assertThatIllegalArgumentException().isThrownBy {
-                LanguageDetectorBuilder.fromAllLanguagesWithout(GERMAN, *languages)
-            }.withMessage(minimumLanguagesErrorMessage)
+            val languages =
+                Language
+                    .values()
+                    .toSet()
+                    .minus(arrayOf(GERMAN, ENGLISH))
+                    .toTypedArray()
+            assertThatIllegalArgumentException()
+                .isThrownBy {
+                    LanguageDetectorBuilder.fromAllLanguagesWithout(GERMAN, *languages)
+                }.withMessage(minimumLanguagesErrorMessage)
         }
     }
 
@@ -180,9 +189,10 @@ class LanguageDetectorBuilderTest {
             )
         }
         run {
-            assertThatIllegalArgumentException().isThrownBy {
-                LanguageDetectorBuilder.fromLanguages(GERMAN)
-            }.withMessage(minimumLanguagesErrorMessage)
+            assertThatIllegalArgumentException()
+                .isThrownBy {
+                    LanguageDetectorBuilder.fromLanguages(GERMAN)
+                }.withMessage(minimumLanguagesErrorMessage)
         }
     }
 
@@ -225,9 +235,10 @@ class LanguageDetectorBuilderTest {
             )
         }
         run {
-            assertThatIllegalArgumentException().isThrownBy {
-                LanguageDetectorBuilder.fromIsoCodes639_1(IsoCode639_1.EN)
-            }.withMessage(minimumLanguagesErrorMessage)
+            assertThatIllegalArgumentException()
+                .isThrownBy {
+                    LanguageDetectorBuilder.fromIsoCodes639_1(IsoCode639_1.EN)
+                }.withMessage(minimumLanguagesErrorMessage)
         }
     }
 
@@ -235,14 +246,16 @@ class LanguageDetectorBuilderTest {
     fun `assert that LanguageDetector can not be built from invalid minimum relative distance value`() {
         val errorMessage = "minimum relative distance must lie in between 0.0 and 0.99"
         run {
-            assertThatIllegalArgumentException().isThrownBy {
-                LanguageDetectorBuilder.fromAllLanguages().withMinimumRelativeDistance(-2.3)
-            }.withMessage(errorMessage)
+            assertThatIllegalArgumentException()
+                .isThrownBy {
+                    LanguageDetectorBuilder.fromAllLanguages().withMinimumRelativeDistance(-2.3)
+                }.withMessage(errorMessage)
         }
         run {
-            assertThatIllegalArgumentException().isThrownBy {
-                LanguageDetectorBuilder.fromAllLanguages().withMinimumRelativeDistance(1.7)
-            }.withMessage(errorMessage)
+            assertThatIllegalArgumentException()
+                .isThrownBy {
+                    LanguageDetectorBuilder.fromAllLanguages().withMinimumRelativeDistance(1.7)
+                }.withMessage(errorMessage)
         }
     }
 
