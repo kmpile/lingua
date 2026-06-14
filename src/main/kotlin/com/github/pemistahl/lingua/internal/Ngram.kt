@@ -28,6 +28,8 @@ internal value class Ngram(
 
     override fun toString() = value
 
+    // Ngrams are ordered by length only (higher-order ngrams sort greater); this ordering is
+    // intentionally inconsistent with equals and exists solely to drive NgramRange iteration.
     override fun compareTo(other: Ngram) = this.value.length.compareTo(other.value.length)
 
     fun rangeOfLowerOrderNgrams() = NgramRange(this, Ngram(this.value[0].toString()))
