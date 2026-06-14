@@ -187,6 +187,7 @@ import com.kmpile.lingua.internal.Alphabet.LATIN
 import com.kmpile.lingua.internal.Alphabet.NONE
 import com.kmpile.lingua.internal.util.extension.enumSetOf
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmStatic
 
 /**
  * The supported detectable languages.

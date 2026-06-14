@@ -147,8 +147,8 @@ private fun greatestCommonDivisor(
     a: Int,
     b: Int,
 ): Int {
-    assert(a >= 0)
-    assert(b >= 0)
+    require(a >= 0)
+    require(b >= 0)
 
     if (a == 0) return b
     if (b == 0) return a

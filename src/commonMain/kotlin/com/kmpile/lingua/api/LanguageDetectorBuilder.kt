@@ -16,6 +16,8 @@
 
 package com.kmpile.lingua.api
 
+import kotlin.jvm.JvmStatic
+
 /**
  * Configures and creates an instance of [LanguageDetector].
  */

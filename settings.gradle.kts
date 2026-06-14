@@ -14,10 +14,25 @@
  * limitations under the License.
  */
 
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
 // Auto-download the JDK requested by the Java toolchain (jvmToolchain(25) in build.gradle.kts)
 // so no machine needs a preinstalled JDK 25.
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
 }
 
 rootProject.name = "lingua"

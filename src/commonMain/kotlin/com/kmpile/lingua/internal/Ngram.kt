@@ -16,6 +16,8 @@
 
 package com.kmpile.lingua.internal
 
+import kotlin.jvm.JvmInline
+
 @JvmInline
 internal value class Ngram(
     val value: String,

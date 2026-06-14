@@ -16,12 +16,8 @@
 
 package com.kmpile.lingua.internal
 
-/**
- * Reads the bundled language-model JSON resource at [filePath], or returns `null` if it is absent.
- */
-internal expect fun readLanguageModelJson(filePath: String): String?
+// wasmJs has no classpath resources and runs single-threaded. Language models are not bundled for
+// this target yet, so detection returns Language.UNKNOWN until resource loading is implemented.
+internal actual fun readLanguageModelJson(filePath: String): String? = null
 
-/**
- * Runs the given [tasks], potentially in parallel, and returns their results in order.
- */
-internal expect fun <T> runTasksInParallel(tasks: List<() -> T>): List<T>
+internal actual fun <T> runTasksInParallel(tasks: List<() -> T>): List<T> = tasks.map { it() }

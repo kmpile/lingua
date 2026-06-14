@@ -16,6 +16,7 @@
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.konan.target.HostManager
 
 val linguaGroupId: String by project
 val linguaName: String by project
@@ -39,6 +40,7 @@ description = linguaDescription
 plugins {
     kotlin("multiplatform") version "2.4.0"
     kotlin("plugin.serialization") version "2.4.0"
+    id("com.android.kotlin.multiplatform.library") version "9.2.1"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     id("org.jetbrains.dokka") version "2.2.0"
     id("org.jetbrains.dokka-javadoc") version "2.2.0"
@@ -48,15 +50,40 @@ plugins {
     signing
 }
 
+@OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
 kotlin {
     // Provision the exact JDK for compilation and the test suite via the foojay resolver
     // (settings.gradle.kts), so the build no longer depends on the machine's installed JDK.
     jvmToolchain(25)
 
+    // Target set mirrors kmpile/llama.cpp-kmp. The Apple targets only build on a macOS host, so
+    // they are declared only there; non-mac builds (and Windows CI) compile the rest.
+    android {
+        namespace = "com.kmpile.lingua"
+        compileSdk = 36
+        minSdk = 24
+        // Android bytecode cannot target 25 the way the desktop JVM does; cap at 11 like the
+        // other kmpile Android libraries.
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
+    }
+
     jvm {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_25)
         }
+    }
+
+    wasmJs {
+        browser()
+    }
+
+    if (HostManager.hostIsMac) {
+        iosX64()
+        iosArm64()
+        iosSimulatorArm64()
+        macosArm64()
     }
 
     sourceSets {
@@ -176,8 +203,4 @@ nexusPublishing {
 signing {
     isRequired = false
     sign(publishing.publications)
-}
-
-repositories {
-    mavenCentral()
 }
