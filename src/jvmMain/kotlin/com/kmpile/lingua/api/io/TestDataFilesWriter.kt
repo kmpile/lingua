@@ -22,7 +22,6 @@ import com.kmpile.lingua.internal.Constant.NUMBERS
 import com.kmpile.lingua.internal.Constant.PUNCTUATION
 import com.kmpile.lingua.internal.io.FilesWriter
 import java.nio.charset.Charset
-import java.nio.file.Files
 import java.nio.file.Path
 
 object TestDataFilesWriter : FilesWriter() {
@@ -75,17 +74,9 @@ object TestDataFilesWriter : FilesWriter() {
         language: Language,
         maximumLines: Int,
     ) {
-        val fileName = "${language.isoCode639_1}.txt"
-        val sentencesDirectoryPath = outputDirectoryPath.resolve("sentences")
-        val sentencesFilePath = sentencesDirectoryPath.resolve(fileName)
+        val sentencesFilePath =
+            prepareOutputFile(outputDirectoryPath.resolve("sentences"), "${language.isoCode639_1}.txt")
         var lineCounter = 0
-
-        if (!Files.isDirectory(sentencesDirectoryPath)) {
-            Files.createDirectory(sentencesDirectoryPath)
-        }
-        if (Files.isRegularFile(sentencesFilePath)) {
-            Files.delete(sentencesFilePath)
-        }
 
         inputFilePath.toFile().bufferedReader(charset = inputFileCharset).useLines { lines ->
             sentencesFilePath.toFile().bufferedWriter().use { writer ->
@@ -108,20 +99,12 @@ object TestDataFilesWriter : FilesWriter() {
         charClass: String,
         maximumLines: Int,
     ): List<String> {
-        val fileName = "${language.isoCode639_1}.txt"
-        val singleWordsDirectoryPath = outputDirectoryPath.resolve("single-words")
-        val singleWordsFilePath = singleWordsDirectoryPath.resolve(fileName)
+        val singleWordsFilePath =
+            prepareOutputFile(outputDirectoryPath.resolve("single-words"), "${language.isoCode639_1}.txt")
         val wordRegex = Regex("[$charClass]{5,}")
 
         val words = mutableListOf<String>()
         var lineCounter = 0
-
-        if (!Files.isDirectory(singleWordsDirectoryPath)) {
-            Files.createDirectory(singleWordsDirectoryPath)
-        }
-        if (Files.isRegularFile(singleWordsFilePath)) {
-            Files.delete(singleWordsFilePath)
-        }
 
         inputFilePath.toFile().bufferedReader(charset = inputFileCharset).useLines { lines ->
             for (line in lines) {
@@ -160,18 +143,10 @@ object TestDataFilesWriter : FilesWriter() {
         language: Language,
         maximumLines: Int,
     ) {
-        val fileName = "${language.isoCode639_1}.txt"
-        val wordPairsDirectoryPath = outputDirectoryPath.resolve("word-pairs")
-        val wordPairsFilePath = wordPairsDirectoryPath.resolve(fileName)
+        val wordPairsFilePath =
+            prepareOutputFile(outputDirectoryPath.resolve("word-pairs"), "${language.isoCode639_1}.txt")
         val wordPairs = mutableSetOf<String>()
         var lineCounter = 0
-
-        if (!Files.isDirectory(wordPairsDirectoryPath)) {
-            Files.createDirectory(wordPairsDirectoryPath)
-        }
-        if (Files.isRegularFile(wordPairsFilePath)) {
-            Files.delete(wordPairsFilePath)
-        }
 
         for (i in 0..(words.size - 2) step 2) {
             wordPairs.add(words.slice(i..i + 1).joinToString(" "))

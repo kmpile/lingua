@@ -16,8 +16,17 @@
 
 package com.kmpile.lingua.internal
 
-// wasmJs has no classpath resources and runs single-threaded. Language models are not bundled for
-// this target yet, so detection returns Language.UNKNOWN until resource loading is implemented.
-internal actual fun readLanguageModelJson(filePath: String): String? = null
+import com.kmpile.lingua.api.Language
+import java.util.concurrent.Callable
+import java.util.concurrent.ForkJoinPool
 
-internal actual fun <T> runTasksInParallel(tasks: List<() -> T>): List<T> = tasks.map { it() }
+// Shared by the jvm (desktop) and android targets: both load models from classpath resources and
+// run tasks on the common ForkJoinPool.
+internal actual fun readLanguageModelJson(filePath: String): String? =
+    Language::class.java.getResourceAsStream(filePath)?.use { it.readBytes().decodeToString() }
+
+internal actual fun <T> runTasksInParallel(tasks: List<() -> T>): List<T> =
+    ForkJoinPool
+        .commonPool()
+        .invokeAll(tasks.map { Callable(it) })
+        .map { it.get() }

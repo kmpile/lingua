@@ -21,7 +21,6 @@ import com.kmpile.lingua.internal.Ngram
 import com.kmpile.lingua.internal.TrainingDataLanguageModel
 import com.kmpile.lingua.internal.io.FilesWriter
 import java.nio.charset.Charset
-import java.nio.file.Files
 import java.nio.file.Path
 
 object LanguageModelFilesWriter : FilesWriter() {
@@ -126,11 +125,7 @@ object LanguageModelFilesWriter : FilesWriter() {
         outputDirectoryPath: Path,
         fileName: String,
     ) {
-        val modelFilePath = outputDirectoryPath.resolve(fileName)
-
-        if (Files.isRegularFile(modelFilePath)) {
-            Files.delete(modelFilePath)
-        }
+        val modelFilePath = prepareOutputFile(outputDirectoryPath, fileName)
 
         modelFilePath.toFile().bufferedWriter().use { writer ->
             writer.write(model.toJson())

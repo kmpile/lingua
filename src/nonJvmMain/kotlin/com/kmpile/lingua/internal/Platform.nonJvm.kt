@@ -16,8 +16,9 @@
 
 package com.kmpile.lingua.internal
 
-// Apple targets have no JVM-style classpath resources. Language models are not bundled for these
-// targets yet, so detection returns Language.UNKNOWN until resource loading is implemented.
+// Shared by every non-JVM target (wasmJs and Apple): these have no JVM-style classpath resources
+// and run single-threaded. Language models are not bundled for these targets yet, so detection
+// returns Language.UNKNOWN until resource loading is implemented.
 internal actual fun readLanguageModelJson(filePath: String): String? = null
 
 internal actual fun <T> runTasksInParallel(tasks: List<() -> T>): List<T> = tasks.map { it() }

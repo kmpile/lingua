@@ -46,4 +46,22 @@ abstract class FilesWriter {
             throw NotDirectoryException("Output directory path '$outputDirectoryPath' does not represent a directory")
         }
     }
+
+    /**
+     * Ensures [directoryPath] exists, deletes any existing file named [fileName] inside it, and
+     * returns the path to write to.
+     */
+    protected fun prepareOutputFile(
+        directoryPath: Path,
+        fileName: String,
+    ): Path {
+        if (!Files.isDirectory(directoryPath)) {
+            Files.createDirectory(directoryPath)
+        }
+        val filePath = directoryPath.resolve(fileName)
+        if (Files.isRegularFile(filePath)) {
+            Files.delete(filePath)
+        }
+        return filePath
+    }
 }

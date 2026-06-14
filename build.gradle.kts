@@ -96,7 +96,23 @@ kotlin {
         macosArm64()
     }
 
+    applyDefaultHierarchyTemplate()
+
     sourceSets {
+        // Two intermediate source sets hold the platform actuals so they are written once each:
+        // jvmCommonMain for the classpath/ForkJoinPool implementations shared by jvm + android, and
+        // nonJvmMain for the single-threaded, resource-less implementations shared by wasmJs + apple.
+        val commonMain by getting
+        val jvmCommonMain by creating { dependsOn(commonMain) }
+        val nonJvmMain by creating { dependsOn(commonMain) }
+
+        getByName("jvmMain").dependsOn(jvmCommonMain)
+        getByName("androidMain").dependsOn(jvmCommonMain)
+        getByName("wasmJsMain").dependsOn(nonJvmMain)
+        if (HostManager.hostIsMac) {
+            getByName("appleMain").dependsOn(nonJvmMain)
+        }
+
         commonMain.dependencies {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.atomicfu)
