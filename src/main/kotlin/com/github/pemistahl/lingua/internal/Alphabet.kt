@@ -46,7 +46,7 @@ internal enum class Alphabet {
     private val script: UnicodeScript? =
         try {
             UnicodeScript.forName(this.name)
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             null
         }
 
@@ -56,7 +56,7 @@ internal enum class Alphabet {
 
     private fun supportedLanguages(): Set<Language> {
         val languages = mutableSetOf<Language>()
-        for (language in Language.values()) {
+        for (language in Language.entries) {
             if (language.alphabets.contains(this)) {
                 languages.add(language)
             }
@@ -67,7 +67,7 @@ internal enum class Alphabet {
     companion object {
         fun allSupportingExactlyOneLanguage(): Map<Alphabet, Language> {
             val alphabets = mutableMapOf<Alphabet, Language>()
-            for (alphabet in values().filterNot { it == NONE }) {
+            for (alphabet in entries.filterNot { it == NONE }) {
                 val supportedLanguages = alphabet.supportedLanguages()
                 if (supportedLanguages.size == 1) {
                     alphabets[alphabet] = supportedLanguages.first()

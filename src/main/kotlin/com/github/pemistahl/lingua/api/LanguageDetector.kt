@@ -167,7 +167,7 @@ class LanguageDetector internal constructor(
 
         val allProbabilitiesAndUnigramCounts = ForkJoinPool.commonPool().invokeAll(tasks).map { it.get() }
         val allProbabilities = allProbabilitiesAndUnigramCounts.map { (probabilities, _) -> probabilities }
-        val unigramCounts = allProbabilitiesAndUnigramCounts[0].second ?: emptyMap()
+        val unigramCounts = allProbabilitiesAndUnigramCounts.firstNotNullOfOrNull { it.second } ?: emptyMap()
         val summedUpProbabilities = sumUpProbabilities(allProbabilities, unigramCounts, filteredLanguages)
         val highestProbability = summedUpProbabilities.maxByOrNull { it.value }?.value ?: return sortedMapOf()
         val confidenceValues = summedUpProbabilities.mapValues { (highestProbability / it.value).toDouble() }
@@ -383,7 +383,7 @@ class LanguageDetector internal constructor(
         val detectedAlphabets = mutableMapOf<Alphabet, Int>()
 
         for (word in words) {
-            for (alphabet in Alphabet.values()) {
+            for (alphabet in Alphabet.entries) {
                 if (alphabet.matches(word)) {
                     detectedAlphabets.incrementCounter(alphabet)
                     break

@@ -149,8 +149,8 @@ class LanguageDetectorBuilder private constructor(
          */
         @JvmStatic
         fun fromAllLanguagesWithout(vararg languages: Language): LanguageDetectorBuilder {
-            val languagesToLoad = Language.values().toMutableList()
-            languagesToLoad.removeAll(arrayOf(Language.UNKNOWN, *languages))
+            val languagesToLoad = Language.entries.toMutableList()
+            languagesToLoad.removeAll((languages.toList() + Language.UNKNOWN).toSet())
             require(languagesToLoad.size >= 2) { MISSING_LANGUAGE_MESSAGE }
             return LanguageDetectorBuilder(languagesToLoad)
         }

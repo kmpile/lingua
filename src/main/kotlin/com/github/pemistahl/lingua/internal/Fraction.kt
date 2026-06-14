@@ -17,6 +17,7 @@
 package com.github.pemistahl.lingua.internal
 
 import com.squareup.moshi.ToJson
+import kotlin.math.abs
 
 internal data class Fraction(
     var numerator: Int,
@@ -147,56 +148,21 @@ internal data class Fraction(
         var x = a
         var y = b
 
-        val xTwos = numberOfTrailingZeros(x)
-        val yTwos = numberOfTrailingZeros(y)
-        val shift = Math.min(xTwos, yTwos)
+        val xTwos = x.countTrailingZeroBits()
+        val yTwos = y.countTrailingZeroBits()
+        val shift = minOf(xTwos, yTwos)
 
         x = x shr xTwos
         y = y shr yTwos
 
         while (x != y) {
             val delta = x - y
-            y = Math.min(x, y)
-            x = Math.abs(delta)
-            x = x shr numberOfTrailingZeros(x)
+            y = minOf(x, y)
+            x = abs(delta)
+            x = x shr x.countTrailingZeroBits()
         }
 
         return x shl shift
-    }
-
-    private fun numberOfTrailingZeros(i: Int): Int {
-        if (i == 0) return 32
-
-        var j = i
-        var n = 31
-
-        var y = j shl 16
-        if (y != 0) {
-            n -= 16
-            j = y
-        }
-        y = j shl 8
-        if (y != 0) {
-            n -= 8
-            j = y
-        }
-        y = j shl 4
-        if (y != 0) {
-            n -= 4
-            j = y
-        }
-        y = j shl 2
-        if (y != 0) {
-            n -= 2
-            j = y
-        }
-
-        return n - (j shl 1).ushr(31)
-    }
-
-    private fun abs(x: Int): Int {
-        val i = x.ushr(31)
-        return (x xor i.inv() + 1) + i
     }
 }
 

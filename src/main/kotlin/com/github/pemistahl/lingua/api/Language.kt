@@ -309,46 +309,46 @@ enum class Language(
          * Returns a list of all built-in languages supporting the Arabic script.
          */
         @JvmStatic
-        fun allWithArabicScript(): List<Language> = values().filter { it.alphabets.contains(Alphabet.ARABIC) }
+        fun allWithArabicScript(): List<Language> = entries.filter { it.alphabets.contains(Alphabet.ARABIC) }
 
         /**
          * Returns a list of all built-in languages supporting the Cyrillic script.
          */
         @JvmStatic
-        fun allWithCyrillicScript(): List<Language> = values().filter { it.alphabets.contains(CYRILLIC) }
+        fun allWithCyrillicScript(): List<Language> = entries.filter { it.alphabets.contains(CYRILLIC) }
 
         /**
          * Returns a list of all built-in languages supporting the Devanagari script.
          */
         @JvmStatic
-        fun allWithDevanagariScript(): List<Language> = values().filter { it.alphabets.contains(DEVANAGARI) }
+        fun allWithDevanagariScript(): List<Language> = entries.filter { it.alphabets.contains(DEVANAGARI) }
 
         /**
          * Returns a list of all built-in languages supporting the Ethiopic script.
          */
         @JvmStatic
-        fun allWithEthiopicScript(): List<Language> = values().filter { it.alphabets.contains(ETHIOPIC) }
+        fun allWithEthiopicScript(): List<Language> = entries.filter { it.alphabets.contains(ETHIOPIC) }
 
         /**
          * Returns a list of all built-in languages supporting the Latin script.
          */
         @JvmStatic
-        fun allWithLatinScript(): List<Language> = values().filter { it.alphabets.contains(Alphabet.LATIN) }
+        fun allWithLatinScript(): List<Language> = entries.filter { it.alphabets.contains(Alphabet.LATIN) }
 
         /**
          * Returns the language for the given ISO 639-1 code.
          */
         @JvmStatic
         @Suppress("ktlint:standard:function-naming")
-        fun getByIsoCode639_1(isoCode: IsoCode639_1): Language = values().first { it.isoCode639_1 == isoCode }
+        fun getByIsoCode639_1(isoCode: IsoCode639_1): Language = entries.first { it.isoCode639_1 == isoCode }
 
         /**
          * Returns the language for the given ISO 639-3 code.
          */
         @JvmStatic
         @Suppress("ktlint:standard:function-naming")
-        fun getByIsoCode639_3(isoCode: IsoCode639_3): Language = values().first { it.isoCode639_3 == isoCode }
+        fun getByIsoCode639_3(isoCode: IsoCode639_3): Language = entries.first { it.isoCode639_3 == isoCode }
 
-        private fun filterOutLanguages(vararg languages: Language) = values().filterNot { it in languages }
+        private fun filterOutLanguages(vararg languages: Language) = entries.filterNot { it in languages }
     }
 }
